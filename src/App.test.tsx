@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import App from './App'
 
 const mockTodos = Array.from({ length: 10 }, (_, i) => ({
@@ -19,6 +19,10 @@ beforeEach(() => {
   )
 })
 
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
 describe('App', () => {
   it('shows loading state initially', () => {
     render(<App />)
@@ -27,7 +31,7 @@ describe('App', () => {
 
   it('renders a checkbox for each todo with correct data-testid', async () => {
     render(<App />)
-    await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
+    await screen.findByTestId('todo-list')
 
     mockTodos.forEach(({ id }) => {
       expect(screen.getByTestId(`todo-checkbox-${id}`)).toBeInTheDocument()
@@ -36,29 +40,49 @@ describe('App', () => {
 
   it('renders exactly 10 checkboxes', async () => {
     render(<App />)
-    await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
+    await screen.findByTestId('todo-list')
 
-    const checkboxes = screen.getAllByRole('checkbox')
-    expect(checkboxes).toHaveLength(10)
+    expect(screen.getAllByRole('checkbox')).toHaveLength(10)
   })
 
   it('reflects completed state from API on each checkbox', async () => {
     render(<App />)
-    await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
+    await screen.findByTestId('todo-list')
 
     mockTodos.forEach(({ id, completed }) => {
       const checkbox = screen.getByTestId(`todo-checkbox-${id}`)
-      expect((checkbox as HTMLInputElement).checked).toBe(completed)
+      if (completed) {
+        expect(checkbox).toBeChecked()
+      } else {
+        expect(checkbox).not.toBeChecked()
+      }
     })
   })
 
-  it('toggles a checkbox on click', async () => {
+  it('toggles a checkbox on click and restores on second click', async () => {
     render(<App />)
-    await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
+    await screen.findByTestId('todo-list')
 
-    const checkbox = screen.getByTestId('todo-checkbox-1') as HTMLInputElement
-    const initial = checkbox.checked
+    const checkbox = screen.getByTestId('todo-checkbox-1')
+    const initial = (checkbox as HTMLInputElement).checked
+
     await userEvent.click(checkbox)
-    expect(checkbox.checked).toBe(!initial)
+    expect((checkbox as HTMLInputElement).checked).toBe(!initial)
+
+    await userEvent.click(checkbox)
+    expect((checkbox as HTMLInputElement).checked).toBe(initial)
+  })
+
+  it('shows error state when API fails', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+      })
+    )
+
+    render(<App />)
+    await screen.findByTestId('error')
+    expect(screen.getByTestId('error')).toHaveTextContent('Failed to fetch todos')
   })
 })
