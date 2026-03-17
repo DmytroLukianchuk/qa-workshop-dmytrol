@@ -18,3 +18,28 @@ test('at least one checkbox is visible', async ({ page }) => {
   const checkbox = page.locator('[data-testid^="todo-checkbox-"]').first()
   await expect(checkbox).toBeVisible()
 })
+
+test('check all todos, click Clear Completed, list disappears and empty state appears', async ({ page }) => {
+  // Wait for todos to load
+  await expect(page.getByTestId('todo-list')).toBeVisible()
+
+  // Check all unchecked checkboxes
+  const checkboxes = page.locator('[data-testid^="todo-checkbox-"]')
+  const count = await checkboxes.count()
+  for (let i = 0; i < count; i++) {
+    const checkbox = checkboxes.nth(i)
+    if (!(await checkbox.isChecked())) {
+      await checkbox.click()
+    }
+  }
+
+  // Click Clear Completed
+  await page.getByTestId('clear-completed-btn').click()
+
+  // Todo list is gone
+  await expect(page.getByTestId('todo-list')).not.toBeVisible()
+
+  // Empty state message appears
+  await expect(page.getByTestId('empty-state')).toBeVisible()
+  await expect(page.getByTestId('empty-state')).toHaveText('No todos found.')
+})
