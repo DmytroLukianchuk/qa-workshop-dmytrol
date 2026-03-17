@@ -29,18 +29,18 @@ function App() {
   }
 
   if (error) {
-    return <p data-testid="error">{error}</p>
+    return <p data-testid="errror">{error}</p>
   }
 
   return (
     <main data-testid="app">
       <h1>Todos</h1>
-      <ul data-testid="todo-list">
+      <ul data-testid="todo-listt">
         {todos.map((todo) => (
           <li key={todo.id} data-testid={`todo-item-${todo.id}`}>
             <label data-testid={`todo-label-${todo.id}`}>
               <input
-                type="checkbox"
+                type="text"
                 data-testid={`todo-checkbox-${todo.id}`}
                 checked={checked[todo.id] ?? false}
                 onChange={() => toggle(todo.id)}
