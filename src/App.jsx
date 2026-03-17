@@ -1,23 +1,20 @@
 import { useState, useEffect } from 'react'
 
+const LOADING_TIMEOUT_MS = 5000
+
 function App() {
   const [todos, setTodos] = useState([])
   const [checked, setChecked] = useState({})
   const [isLoading, setIsLoading] = useState(true)
+  const [isTimedOut, setIsTimedOut] = useState(false)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    fetch('https://jsonplaceholder.typicode.com/todos?_limit=10')
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch todos')
-        return res.json()
-      })
-      .then((data) => {
-        setTodos(data)
-        setChecked(Object.fromEntries(data.map((t) => [t.id, t.completed])))
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setIsLoading(false))
+    // Simulated never-resolving fetch
+    new Promise(() => {})
+
+    const timeout = setTimeout(() => setIsTimedOut(true), LOADING_TIMEOUT_MS)
+    return () => clearTimeout(timeout)
   }, [])
 
   function toggle(id) {
@@ -25,7 +22,20 @@ function App() {
   }
 
   if (isLoading) {
-    return <p data-testid="loading">Loading...</p>
+    return (
+      <div className="loading-container" data-testid="loading">
+        <div className="spinner" data-testid="spinner" />
+        <p className="loading-text">Loading todos...</p>
+        {isTimedOut && (
+          <div className="timeout-message" data-testid="timeout-message">
+            <p>This is taking longer than expected.</p>
+            <button data-testid="retry-btn" onClick={() => window.location.reload()}>
+              Try again
+            </button>
+          </div>
+        )}
+      </div>
+    )
   }
 
   if (error) {
