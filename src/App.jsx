@@ -32,9 +32,16 @@ function App() {
     return <p data-testid="error">{error}</p>
   }
 
+  function clearCompleted() {
+    setTodos((prev) => prev.filter((t) => !checked[t.id]))
+  }
+
   return (
     <main data-testid="app">
       <h1>Todos</h1>
+      <button data-testid="clear-completed-btn" onClick={clearCompleted}>
+        Clear Completed
+      </button>
       <ul data-testid="todo-list">
         {todos.map((todo) => (
           <li key={todo.id} data-testid={`todo-item-${todo.id}`}>
