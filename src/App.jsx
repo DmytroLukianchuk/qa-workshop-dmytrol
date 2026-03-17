@@ -91,7 +91,15 @@ function App() {
   }
 
   if (error) {
-    return <p data-testid="error">{error}</p>
+    return (
+      <div className="error-card" data-testid="error-state">
+        <h2 data-testid="error-title">Something went wrong</h2>
+        <p data-testid="error-message">{error}</p>
+        <button data-testid="retry-btn" onClick={() => window.location.reload()}>
+          Try again
+        </button>
+      </div>
+    )
   }
 
   if (todos.length === 0) {

@@ -121,6 +121,41 @@ describe('App', () => {
     expect(screen.queryByTestId('todo-list')).not.toBeInTheDocument()
   })
 
+  it('shows user-friendly error card when API returns non-2xx status', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+      })
+    )
+
+    render(<App />)
+    await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
+
+    expect(screen.getByTestId('error-state')).toBeInTheDocument()
+    expect(screen.getByTestId('error-title')).toHaveTextContent('Something went wrong')
+    expect(screen.getByTestId('error-message')).toHaveTextContent('Failed to fetch todos')
+    expect(screen.getByTestId('retry-btn')).toBeInTheDocument()
+  })
+
+  it('shows error card when API returns HTTP 200 with non-array body', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ error: 'Not Found', status: 404, message: 'Resource not found' }),
+      })
+    )
+
+    render(<App />)
+    await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
+
+    expect(screen.getByTestId('error-state')).toBeInTheDocument()
+    expect(screen.getByTestId('error-title')).toHaveTextContent('Something went wrong')
+    expect(screen.getByTestId('error-message')).toHaveTextContent('Unexpected response from server')
+    expect(screen.getByTestId('retry-btn')).toBeInTheDocument()
+  })
+
   it('cleans up checked state for removed todos after Clear Completed', async () => {
     render(<App />)
     await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
@@ -148,8 +183,9 @@ describe('App', () => {
     )
 
     render(<App />)
-    await waitFor(() => expect(screen.getByTestId('error')).toBeInTheDocument())
-    expect(screen.getByTestId('error')).toHaveTextContent('Failed to fetch todos')
+    await waitFor(() => expect(screen.getByTestId('error-state')).toBeInTheDocument())
+    expect(screen.getByTestId('error-title')).toHaveTextContent('Something went wrong')
+    expect(screen.getByTestId('error-message')).toHaveTextContent('Failed to fetch todos')
   })
 
   it('silently ignores AbortError and does not show an error', async () => {
@@ -160,7 +196,7 @@ describe('App', () => {
 
     render(<App />)
     await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
-    expect(screen.queryByTestId('error')).toBeNull()
+    expect(screen.queryByTestId('error-state')).toBeNull()
   })
 
   it('shows timeout message after 5 seconds of loading', async () => {
