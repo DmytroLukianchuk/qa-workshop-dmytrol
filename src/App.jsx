@@ -60,6 +60,18 @@ function App() {
     dragIndex.current = null
   }
 
+  function clearCompleted() {
+    const completedIds = new Set(todos.filter((t) => checked[t.id]).map((t) => t.id))
+    setTodos((prev) => prev.filter((t) => !completedIds.has(t.id)))
+    setChecked((prev) => {
+      const next = { ...prev }
+      completedIds.forEach((id) => delete next[id])
+      return next
+    })
+  }
+
+  const completedCount = todos.filter((t) => checked[t.id]).length
+
   if (isLoading) {
     return (
       <div className="loading-container" data-testid="loading">
@@ -81,13 +93,14 @@ function App() {
     return <p data-testid="error">{error}</p>
   }
 
-  function clearCompleted() {
-    setTodos((prev) => prev.filter((t) => !checked[t.id]))
+  if (todos.length === 0) {
+    return <p data-testid="empty-state">No todos found.</p>
   }
 
   return (
     <main className="app" data-testid="app">
       <h1>Todos</h1>
+      <p data-testid="completion-counter">{completedCount}/{todos.length} completed</p>
       <button data-testid="clear-completed-btn" onClick={clearCompleted}>
         Clear Completed
       </button>
