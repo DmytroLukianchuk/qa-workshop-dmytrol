@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTheme } from './useTheme'
 
 const LOADING_TIMEOUT_MS = 5000
 
 function App() {
+  const { theme, toggle: toggleTheme } = useTheme()
   const [todos, setTodos] = useState([])
   const [checked, setChecked] = useState({})
   const [isLoading, setIsLoading] = useState(true)
@@ -105,6 +107,19 @@ function App() {
       .finally(() => setIsSubmitting(false))
   }
 
+  function ThemeToggleBtn() {
+    return (
+      <button
+        className="theme-toggle"
+        data-testid="theme-toggle"
+        onClick={toggleTheme}
+        aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+      >
+        {theme === 'dark' ? '☀️' : '🌙'}
+      </button>
+    )
+  }
+
 
   if (isLoading) {
     return (
@@ -145,7 +160,10 @@ function App() {
 
   return (
     <main className="app" data-testid="app">
-      <h1>Todos</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1>Todos</h1>
+        <ThemeToggleBtn />
+      </div>
       <p data-testid="completion-counter">{completedCount}/{todos.length} completed</p>
       {userName && <p data-testid="logged-in-as">Logged in as {userName}</p>}
       <form
