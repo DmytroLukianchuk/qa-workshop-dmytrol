@@ -121,7 +121,7 @@ describe('App', () => {
     expect(screen.queryByTestId('todo-list')).not.toBeInTheDocument()
   })
 
-  it('shows user-friendly error card when API fails', async () => {
+  it('shows user-friendly error card when API returns non-2xx status', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
@@ -135,6 +135,24 @@ describe('App', () => {
     expect(screen.getByTestId('error-state')).toBeInTheDocument()
     expect(screen.getByTestId('error-title')).toHaveTextContent('Something went wrong')
     expect(screen.getByTestId('error-message')).toHaveTextContent('Failed to fetch todos')
+    expect(screen.getByTestId('retry-btn')).toBeInTheDocument()
+  })
+
+  it('shows error card when API returns HTTP 200 with non-array body', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ error: 'Not Found', status: 404, message: 'Resource not found' }),
+      })
+    )
+
+    render(<App />)
+    await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
+
+    expect(screen.getByTestId('error-state')).toBeInTheDocument()
+    expect(screen.getByTestId('error-title')).toHaveTextContent('Something went wrong')
+    expect(screen.getByTestId('error-message')).toHaveTextContent('Unexpected response from server')
     expect(screen.getByTestId('retry-btn')).toBeInTheDocument()
   })
 

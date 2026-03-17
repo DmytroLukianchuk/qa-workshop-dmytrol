@@ -13,6 +13,7 @@ function App() {
         return res.json()
       })
       .then((data) => {
+        if (!Array.isArray(data)) throw new Error('Unexpected response from server')
         setTodos(data)
         setChecked(Object.fromEntries(data.map((t) => [t.id, t.completed])))
       })
@@ -40,9 +41,29 @@ function App() {
     )
   }
 
+  function clearCompleted() {
+    const completedIds = new Set(todos.filter((t) => checked[t.id]).map((t) => t.id))
+    setTodos((prev) => prev.filter((t) => !completedIds.has(t.id)))
+    setChecked((prev) => {
+      const next = { ...prev }
+      completedIds.forEach((id) => delete next[id])
+      return next
+    })
+  }
+
+  const completedCount = todos.filter((t) => checked[t.id]).length
+
+  if (todos.length === 0) {
+    return <p data-testid="empty-state">No todos found.</p>
+  }
+
   return (
     <main data-testid="app">
       <h1>Todos</h1>
+      <p data-testid="completion-counter">{completedCount}/{todos.length} completed</p>
+      <button data-testid="clear-completed-btn" onClick={clearCompleted}>
+        Clear Completed
+      </button>
       <ul data-testid="todo-list">
         {todos.map((todo) => (
           <li key={todo.id} data-testid={`todo-item-${todo.id}`}>
