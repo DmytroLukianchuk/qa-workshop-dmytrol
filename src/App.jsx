@@ -8,6 +8,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [isTimedOut, setIsTimedOut] = useState(false)
   const [error, setError] = useState(null)
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -64,11 +65,22 @@ function App() {
     return <p data-testid="error">{error}</p>
   }
 
+  const filtered = todos.filter((t) =>
+    t.title.toLowerCase().includes(query.toLowerCase())
+  )
+
   return (
     <main data-testid="app">
       <h1>Todos</h1>
+      <input
+        type="text"
+        data-testid="search-input"
+        placeholder="Search todos..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
       <ul data-testid="todo-list">
-        {todos.map((todo) => (
+        {filtered.map((todo) => (
           <li key={todo.id} data-testid={`todo-item-${todo.id}`}>
             <label data-testid={`todo-label-${todo.id}`}>
               <input
