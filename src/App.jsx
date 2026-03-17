@@ -8,6 +8,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [isTimedOut, setIsTimedOut] = useState(false)
   const [error, setError] = useState(null)
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -85,14 +86,25 @@ function App() {
     setTodos((prev) => prev.filter((t) => !checked[t.id]))
   }
 
+  const filtered = todos.filter((t) =>
+    t.title.toLowerCase().includes(query.toLowerCase())
+  )
+
   return (
     <main className="app" data-testid="app">
       <h1>Todos</h1>
       <button data-testid="clear-completed-btn" onClick={clearCompleted}>
         Clear Completed
       </button>
+      <input
+        type="text"
+        data-testid="search-input"
+        placeholder="Search todos..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
       <ul data-testid="todo-list">
-        {todos.map((todo, index) => (
+        {filtered.map((todo, index) => (
           <li
             key={todo.id}
             data-testid={`todo-item-${todo.id}`}
