@@ -18,3 +18,9 @@ test('at least one checkbox is visible', async ({ page }) => {
   const checkbox = page.locator('[data-testid^="todo-checkbox-"]').first()
   await expect(checkbox).toBeVisible()
 })
+
+test('loading state appears then disappears once data loads', async ({ page }) => {
+  await expect(page.getByTestId('loading')).toBeVisible()
+  await expect(page.getByTestId('loading')).not.toBeVisible()
+  await expect(page.getByTestId('todo-list')).toBeVisible()
+})
