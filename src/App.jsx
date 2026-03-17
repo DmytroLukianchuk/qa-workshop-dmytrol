@@ -39,8 +39,33 @@ function App() {
     }
   }, [])
 
+  const [newTitle, setNewTitle] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   function toggle(id) {
     setChecked((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
+
+  function addTodo() {
+    const title = newTitle.trim()
+    if (!title) return
+    setNewTitle('')
+    setIsSubmitting(true)
+
+    fetch('https://jsonplaceholder.typicode.com/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, completed: false }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to add todo')
+        return res.json()
+      })
+      .then((created) => {
+        setTodos((prev) => [...prev, created])
+        setChecked((prev) => ({ ...prev, [created.id]: false }))
+      })
+      .finally(() => setIsSubmitting(false))
   }
 
   if (isLoading) {
@@ -67,6 +92,21 @@ function App() {
   return (
     <main data-testid="app">
       <h1>Todos</h1>
+      <form
+        data-testid="add-todo-form"
+        onSubmit={(e) => { e.preventDefault(); addTodo() }}
+      >
+        <input
+          type="text"
+          data-testid="new-todo-input"
+          placeholder="New todo..."
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+        />
+        <button type="submit" data-testid="add-todo-btn" disabled={isSubmitting}>
+          {isSubmitting ? 'Adding...' : 'Add'}
+        </button>
+      </form>
       <ul data-testid="todo-list">
         {todos.map((todo) => (
           <li key={todo.id} data-testid={`todo-item-${todo.id}`}>
