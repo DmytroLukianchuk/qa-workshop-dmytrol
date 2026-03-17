@@ -9,6 +9,7 @@ function App() {
   const [isTimedOut, setIsTimedOut] = useState(false)
   const [error, setError] = useState(null)
   const [query, setQuery] = useState('')
+  const [userName, setUserName] = useState(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -38,6 +39,13 @@ function App() {
       controller.abort()
       clearTimeout(timeout)
     }
+  }, [])
+
+  useEffect(() => {
+    fetch('https://jsonplaceholder.typicode.com/users/1')
+      .then((res) => res.json())
+      .then((data) => setUserName(data.name))
+      .catch(() => {})
   }, [])
 
   const dragIndex = useRef(null)
@@ -114,6 +122,7 @@ function App() {
     <main className="app" data-testid="app">
       <h1>Todos</h1>
       <p data-testid="completion-counter">{completedCount}/{todos.length} completed</p>
+      {userName && <p data-testid="logged-in-as">Logged in as {userName}</p>}
       <button data-testid="clear-completed-btn" onClick={clearCompleted}>
         Clear Completed
       </button>
