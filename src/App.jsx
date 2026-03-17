@@ -64,6 +64,10 @@ function App() {
     return <p data-testid="error">{error}</p>
   }
 
+  if (todos.length === 0) {
+    return <p data-testid="empty-state">No todos found.</p>
+  }
+
   return (
     <main data-testid="app">
       <h1>Todos</h1>

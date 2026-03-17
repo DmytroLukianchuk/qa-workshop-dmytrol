@@ -52,6 +52,22 @@ describe('App', () => {
     })
   })
 
+  it('shows empty state when API returns an empty array', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([]),
+      })
+    )
+
+    render(<App />)
+    await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
+
+    expect(screen.getByTestId('empty-state')).toHaveTextContent('No todos found.')
+    expect(screen.queryByTestId('todo-list')).not.toBeInTheDocument()
+  })
+
   it('toggles a checkbox on click', async () => {
     render(<App />)
     await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
