@@ -11,6 +11,7 @@
     "start": "vite --port 3000",
     "build": "vite build",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
     "test:report": "playwright show-report",

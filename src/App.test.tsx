@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import App from './App'
@@ -60,5 +60,40 @@ describe('App', () => {
     const initial = checkbox.checked
     await userEvent.click(checkbox)
     expect(checkbox.checked).toBe(!initial)
+  })
+
+  it('shows error message when fetch fails', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ ok: false })
+    )
+
+    render(<App />)
+    await waitFor(() => expect(screen.getByTestId('error')).toBeInTheDocument())
+    expect(screen.getByTestId('error')).toHaveTextContent('Failed to fetch todos')
+  })
+
+  it('silently ignores AbortError and does not show an error', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockRejectedValue(Object.assign(new Error('aborted'), { name: 'AbortError' }))
+    )
+
+    render(<App />)
+    await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
+    expect(screen.queryByTestId('error')).toBeNull()
+  })
+
+  it('shows timeout message after 5 seconds of loading', async () => {
+    vi.useFakeTimers()
+    vi.stubGlobal('fetch', vi.fn().mockReturnValue(new Promise(() => {})))
+
+    render(<App />)
+    expect(screen.queryByTestId('timeout-message')).toBeNull()
+
+    await act(async () => { vi.advanceTimersByTime(5000) })
+
+    expect(screen.getByTestId('timeout-message')).toBeInTheDocument()
+    vi.useRealTimers()
   })
 })
