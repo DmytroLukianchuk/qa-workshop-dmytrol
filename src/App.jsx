@@ -8,6 +8,14 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [isTimedOut, setIsTimedOut] = useState(false)
   const [error, setError] = useState(null)
+  const [userName, setUserName] = useState(null)
+
+  useEffect(() => {
+    fetch('https://jsonplaceholder.typicode.com/users/1')
+      .then((res) => res.json())
+      .then((data) => setUserName(data.name))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -67,6 +75,7 @@ function App() {
   return (
     <main data-testid="app">
       <h1>Todos</h1>
+      {userName && <p data-testid="logged-in-as">Logged in as {userName}</p>}
       <ul data-testid="todo-list">
         {todos.map((todo) => (
           <li key={todo.id} data-testid={`todo-item-${todo.id}`}>
