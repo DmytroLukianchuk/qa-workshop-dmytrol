@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const LOADING_TIMEOUT_MS = 5000
 
@@ -39,8 +39,25 @@ function App() {
     }
   }, [])
 
+  const dragIndex = useRef(null)
+
   function toggle(id) {
     setChecked((prev) => ({ ...prev, [id]: !prev[id] }))
+  }
+
+  function handleDragStart(index) {
+    dragIndex.current = index
+  }
+
+  function handleDrop(index) {
+    if (dragIndex.current === null || dragIndex.current === index) return
+    setTodos((prev) => {
+      const next = [...prev]
+      const [moved] = next.splice(dragIndex.current, 1)
+      next.splice(index, 0, moved)
+      return next
+    })
+    dragIndex.current = null
   }
 
   if (isLoading) {
@@ -69,14 +86,21 @@ function App() {
   }
 
   return (
-    <main data-testid="app">
+    <main className="app" data-testid="app">
       <h1>Todos</h1>
       <button data-testid="clear-completed-btn" onClick={clearCompleted}>
         Clear Completed
       </button>
       <ul data-testid="todo-list">
-        {todos.map((todo) => (
-          <li key={todo.id} data-testid={`todo-item-${todo.id}`}>
+        {todos.map((todo, index) => (
+          <li
+            key={todo.id}
+            data-testid={`todo-item-${todo.id}`}
+            draggable
+            onDragStart={() => handleDragStart(index)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={() => handleDrop(index)}
+          >
             <label data-testid={`todo-label-${todo.id}`}>
               <input
                 type="checkbox"
