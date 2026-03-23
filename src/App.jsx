@@ -10,6 +10,8 @@ function App() {
   const [error, setError] = useState(null)
   const [query, setQuery] = useState('')
   const [userName, setUserName] = useState(null)
+  const [newTitle, setNewTitle] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -81,6 +83,29 @@ function App() {
 
   const completedCount = todos.filter((t) => checked[t.id]).length
 
+  function addTodo() {
+    const title = newTitle.trim()
+    if (!title) return
+    setNewTitle('')
+    setIsSubmitting(true)
+
+    fetch('https://jsonplaceholder.typicode.com/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, completed: false }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to add todo')
+        return res.json()
+      })
+      .then((created) => {
+        setTodos((prev) => [...prev, created])
+        setChecked((prev) => ({ ...prev, [created.id]: false }))
+      })
+      .finally(() => setIsSubmitting(false))
+  }
+
+
   if (isLoading) {
     return (
       <div className="loading-container" data-testid="loading">
@@ -123,6 +148,21 @@ function App() {
       <h1>Todos</h1>
       <p data-testid="completion-counter">{completedCount}/{todos.length} completed</p>
       {userName && <p data-testid="logged-in-as">Logged in as {userName}</p>}
+      <form
+        data-testid="add-todo-form"
+        onSubmit={(e) => { e.preventDefault(); addTodo() }}
+      >
+        <input
+          type="text"
+          data-testid="new-todo-input"
+          placeholder="New todo..."
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+        />
+        <button type="submit" data-testid="add-todo-btn" disabled={isSubmitting}>
+          {isSubmitting ? 'Adding...' : 'Add'}
+        </button>
+      </form>
       <button data-testid="clear-completed-btn" onClick={clearCompleted}>
         Clear Completed
       </button>
