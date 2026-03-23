@@ -9,12 +9,16 @@ const mockTodos = Array.from({ length: 10 }, (_, i) => ({
   completed: i % 2 === 0,
 }))
 
+const mockUser = { id: 1, name: 'Leanne Graham' }
+
 beforeEach(() => {
   vi.stubGlobal(
     'fetch',
-    vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockTodos),
+    vi.fn().mockImplementation((url: string) => {
+      if (url.includes('/users/')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(mockUser) })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTodos) })
     })
   )
 })
@@ -76,6 +80,7 @@ describe('App', () => {
     })
   })
 
+<<<<<<< HEAD
   it('shows correct initial completion counter', async () => {
     render(<App />)
     await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
@@ -164,6 +169,28 @@ describe('App', () => {
 
     // Only uncompleted todos remain — counter must show 0/5
     expect(screen.getByTestId('completion-counter')).toHaveTextContent('0/5 completed')
+  })
+
+  it('displays logged-in-as indicator with user name', async () => {
+    render(<App />)
+    await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
+
+    expect(screen.getByTestId('logged-in-as')).toHaveTextContent('Logged in as Leanne Graham')
+  })
+
+  it('does not show logged-in-as indicator when user fetch fails', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((url: string) => {
+        if (url.includes('/users/')) {
+          return Promise.reject(new Error('Network error'))
+        }
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(mockTodos) })
+      })
+    )
+    render(<App />)
+    await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
+    expect(screen.queryByTestId('logged-in-as')).not.toBeInTheDocument()
   })
 
   it('toggles a checkbox on click', async () => {
