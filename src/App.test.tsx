@@ -52,6 +52,30 @@ describe('App', () => {
     })
   })
 
+  it('renders the Clear Completed button', async () => {
+    render(<App />)
+    await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
+
+    expect(screen.getByTestId('clear-completed-btn')).toBeInTheDocument()
+  })
+
+  it('removes completed todos when Clear Completed is clicked', async () => {
+    render(<App />)
+    await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
+
+    const completedIds = mockTodos.filter((t) => t.completed).map((t) => t.id)
+    const uncompletedIds = mockTodos.filter((t) => !t.completed).map((t) => t.id)
+
+    await userEvent.click(screen.getByTestId('clear-completed-btn'))
+
+    completedIds.forEach((id) => {
+      expect(screen.queryByTestId(`todo-item-${id}`)).not.toBeInTheDocument()
+    })
+    uncompletedIds.forEach((id) => {
+      expect(screen.getByTestId(`todo-item-${id}`)).toBeInTheDocument()
+    })
+  })
+
   it('toggles a checkbox on click', async () => {
     render(<App />)
     await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
