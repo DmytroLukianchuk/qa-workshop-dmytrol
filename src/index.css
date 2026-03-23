@@ -1,3 +1,30 @@
+/* ── Theme tokens ── */
+:root {
+  --bg:           #ffffff;
+  --bg-surface:   #f4f4f5;
+  --bg-item:      #ffffff;
+  --text:         #18181b;
+  --text-muted:   #71717a;
+  --border:       #e4e4e7;
+  --accent:       #4f46e5;
+  --accent-hover: #4338ca;
+  --check-bg:     #4f46e5;
+  --shadow:       0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] {
+  --bg:           #0f0f1a;
+  --bg-surface:   #1a1a2e;
+  --bg-item:      #1e1e35;
+  --text:         #e4e4f0;
+  --text-muted:   #8888aa;
+  --border:       #2a2a4a;
+  --accent:       #818cf8;
+  --accent-hover: #a5b4fc;
+  --check-bg:     #818cf8;
+  --shadow:       0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -212,7 +239,6 @@ h1 {
   background-color: #2980b9;
 }
 
-
 .error-card {
   display: flex;
   flex-direction: column;
@@ -247,5 +273,21 @@ h1 {
 
 .error-card button:hover {
   background-color: #a93226;
+}
+
+/* ── Theme toggle ── */
+.theme-toggle {
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+  line-height: 1;
+}
+
+.theme-toggle:hover {
+  background: #f1f5f9;
 }
 
