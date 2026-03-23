@@ -34,3 +34,9 @@ test('fourth test - check all todos, click Clear Completed, list disappears and 
   await expect(page.getByTestId('empty-state')).toBeVisible()
   await expect(page.getByTestId('empty-state')).toHaveText('No todos found.')
 })
+
+test('loading state appears then disappears once data loads', async ({ page }) => {
+  await expect(page.getByTestId('loading')).toBeVisible()
+  await expect(page.getByTestId('loading')).not.toBeVisible()
+  await expect(page.getByTestId('todo-list')).toBeVisible()
+})
