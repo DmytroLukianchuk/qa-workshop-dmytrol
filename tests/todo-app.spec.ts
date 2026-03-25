@@ -36,7 +36,28 @@ test('fourth test - check all todos, click Clear Completed, list disappears and 
 })
 
 test('loading state appears then disappears once data loads', async ({ page }) => {
+  await page.addInitScript(() => {
+    const originalFetch = window.fetch.bind(window)
+
+    window.fetch = async (...args) => {
+      const [input] = args
+      const url =
+        typeof input === 'string'
+          ? input
+          : input instanceof Request
+            ? input.url
+            : String(input)
+
+      if (url.includes('/todos')) {
+        await new Promise((resolve) => window.setTimeout(resolve, 300))
+      }
+
+      return originalFetch(...args)
+    }
+  })
+
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
   await expect(page.getByTestId('loading')).toBeVisible()
-  await expect(page.getByTestId('loading')).not.toBeVisible()
   await expect(page.getByTestId('todo-list')).toBeVisible()
+  await expect(page.getByTestId('loading')).toHaveCount(0)
 })

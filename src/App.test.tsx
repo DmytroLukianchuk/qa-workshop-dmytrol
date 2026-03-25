@@ -80,7 +80,6 @@ describe('App', () => {
     })
   })
 
-<<<<<<< HEAD
   it('shows correct initial completion counter', async () => {
     render(<App />)
     await waitFor(() => expect(screen.queryByTestId('loading')).toBeNull())
